@@ -8,6 +8,7 @@ boto3 = ">=1.24"
 requests = ">=2.27"
 rich = ">=12.4"
 unitypy = ">=1.8"
+cloudinary = "*"
 
 [dev-packages]
 autopep8 = "*"

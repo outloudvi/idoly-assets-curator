@@ -18,5 +18,7 @@ def get_origin_url(item) -> str:
 
 
 def file_exists(url: str) -> bool:
-    resp = requests.head(url)
-    return resp.status_code == 200
+    resp = requests.get(url, headers={
+        "Range": "Bytes=0-1"
+    })
+    return resp.status_code == 206

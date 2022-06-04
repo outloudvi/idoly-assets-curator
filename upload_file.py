@@ -1,18 +1,14 @@
-from io import BytesIO
-import boto3
-from botocore.config import Config
+import cloudinary
+from cloudinary.uploader import upload
 import config
 
-b2 = boto3.resource(
-    service_name='s3',
-    aws_access_key_id=config.B2_KEY_ID,
-    aws_secret_access_key=config.B2_APP_KEY,
-    endpoint_url=config.B2_ENDPOINT_URL,
-    config=Config(
-        signature_version='s3v4')
+cloudinary.config(
+    cloud_name=config.CLOUDINARY_CLOUD_NAME,
+    api_key=config.CLOUDINARY_API_KEY,
+    api_secret=config.CLOUDINARY_API_SECRET,
+    secure=True
 )
-bucket = b2.Bucket(config.B2_BUCKET_NAME)
 
 
 def upload_file(byt: bytes, path: str):
-    bucket.put_object(Body=byt, Key=path, ContentType="image/png")
+    upload(byt, public_id=path)
