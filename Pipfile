@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+boto3 = ">=1.24"
+requests = ">=2.27"
+rich = ">=12.4"
+unitypy = ">=1.8"
+
+[dev-packages]
+autopep8 = "*"
+python-dotenv = "*"
+
+[requires]
+python_version = "3.9"
