@@ -1,4 +1,3 @@
-import io
 from urllib.parse import urljoin
 from os import path
 import requests
@@ -28,6 +27,9 @@ class SoundAgent(Agent):
         return self.slug.startswith("sud_")
 
     def shall_upload(self) -> bool:
+        if self.ext != "opus":
+            # Only upload/convert on requesting opus, not mp3
+            return False
         assets_url = urljoin(config.B2_BASEURL, self.asset_path + ".opus")
         resp = requests.get(assets_url, headers={
             "Range": "Bytes=0-1"
@@ -55,4 +57,7 @@ class SoundAgent(Agent):
         )
 
     def generate_url(self):
-        return urljoin(config.B2_BASEURL, self.asset_path + ".opus")
+        if self.ext == "mp3":
+            return urljoin(config.B2_BASEURL, self.asset_path + ".mp3")
+        else:
+            return urljoin(config.B2_BASEURL, self.asset_path + ".opus")

@@ -10,7 +10,9 @@ import UnityPy
 class Agent:
 
     def __init__(self, slug) -> None:
-        self.slug = slug
+        slug_parts = slug.split(".")
+        self.slug = slug_parts[0]
+        self.ext = slug_parts[1] if len(slug_parts) > 1 else None
 
     def pre_check(self) -> bool:
         return True
