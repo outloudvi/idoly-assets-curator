@@ -1,32 +1,50 @@
-from http.server import BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+import io
+from urllib.parse import urljoin
+from os import path
+import requests
 
-from main import get_image_url
+import config
+from agent import Agent
+from utils import id_to_path_segs
+from upload.cloudinary import upload_file
 
 
-class handler(BaseHTTPRequestHandler):
+class ImageAgent(Agent):
+    asset_path = ""
+    filter_asset_type = "Texture2D"
 
-    def do_GET(self):
-        path = urlparse(self.path).path.split("/")
-        print(path)
-        if len(path) != 4:
-            self.send_response(400)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            message = f"Invalid id in path: {path}"
-            self.wfile.write(message.encode())
-            return
+    def __init__(self, slug) -> None:
+        super().__init__(slug)
+        self.check_url = slug
+        path_segs = id_to_path_segs(slug)
+        self.asset_path = path.join(
+            config.CL_ASSET_DIR, *path_segs
+        )
 
-        image_url = get_image_url(path[3])
-        if image_url is None:
-            self.send_response(404)
-            self.send_header('Content-type', 'text/plain')
-            self.end_headers()
-            message = "Asset not found"
-            self.wfile.write(message.encode())
-            return
+    def pre_check(self) -> bool:
+        return self.slug.startswith("img_")
 
-        self.send_response(302)
-        self.send_header('Location', image_url)
-        self.end_headers()
-        return
+    def shall_upload(self) -> bool:
+        assets_url = urljoin(config.CL_BASEURL, self.asset_path + ".png")
+        resp = requests.get(assets_url, headers={
+            "Range": "Bytes=0-1"
+        })
+        return resp.status_code != 206
+
+    def pick_item(self, items):
+        return list(filter(lambda x: x.type.name == self.filter_asset_type, items))[0]
+
+    def object_to_bytes(self, obj):
+        return obj.read().image
+
+    def upload_object(self, byt):
+        png_bytesio_w = io.BytesIO()
+        byt.save(png_bytesio_w, format='PNG')
+        upload_file(
+            png_bytesio_w.getvalue(),
+            self.asset_path,
+            "image/png"
+        )
+
+    def generate_url(self):
+        return urljoin(config.CL_BASEURL, f"f_auto/{self.asset_path}.png")

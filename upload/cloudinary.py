@@ -10,5 +10,5 @@ cloudinary.config(
 )
 
 
-def upload_file(byt: bytes, path: str):
+def upload_file(byt: bytes, path: str, content_type: str):
     upload(byt, public_id=path)

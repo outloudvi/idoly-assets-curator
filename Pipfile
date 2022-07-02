@@ -9,6 +9,7 @@ requests = ">=2.27"
 rich = ">=12.4"
 unitypy = ">=1.8"
 cloudinary = "*"
+flask = "*"
 
 [dev-packages]
 autopep8 = "*"

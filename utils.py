@@ -1,5 +1,16 @@
-from typing import List
+import config
+from typing import Tuple, Union, List
+import json
+
+from flask import redirect
 import requests
+
+
+def post_agent(ret: Tuple[int, str]):
+    if ret[0] == 302:
+        return redirect(ret[1], code=ret[0])
+    else:
+        return ret[1], ret[0]
 
 
 def id_to_path_segs(id: str) -> List[str]:
@@ -17,8 +28,11 @@ def get_origin_url(item) -> str:
     return f"https://d2ilil7yh5oi1v.cloudfront.net/solis-{upload_version_id}-{typ}/{object_name}?generation={generation}&alt=media"
 
 
-def file_exists(url: str) -> bool:
-    resp = requests.get(url, headers={
-        "Range": "Bytes=0-1"
-    })
-    return resp.status_code == 206
+def get_item(name: str) -> Union[dict, None]:
+    resp = requests.get(f"{config.API_LOOKUP_URL}?name={name}",
+                        headers={
+                            "Authorization": f"Bearer {config.API_SECRET}"
+                        })
+    if resp.status_code != 200:
+        return None
+    return json.loads(resp.text)

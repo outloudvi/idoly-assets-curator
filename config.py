@@ -6,6 +6,7 @@ try:
 except Exception:
     pass
 
+B2_BASEURL = getenv('B2_BASEURL')
 B2_ENDPOINT_URL = getenv('B2_ENDPOINT_URL')
 B2_KEY_ID = getenv('B2_KEY_ID')
 B2_APP_KEY = getenv('B2_APP_KEY')

@@ -8,6 +8,7 @@ def deobfuscate(byt: bytes, item: dict) -> bytes:
         return pak
     return None
 
+# https://github.com/MalitsPlus/HoshimiToolkit/blob/9ef3f466ed344511806e74c5200c496302f5aa21/ipr/assets/MaskedHeaderStream.py
 
 def string_to_mask_bytes(mask_string: str, mask_string_length: int, bytes_length: int) -> bytes:
     mask_bytes = bytearray(bytes_length)
