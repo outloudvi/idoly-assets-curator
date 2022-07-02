@@ -7,6 +7,7 @@ import config
 from agent import Agent
 from utils import id_to_path_segs
 from upload.backblaze import upload_file
+from ffutils import wav_to_mp3, wav_to_opus
 
 PATH_PREFIX = "assets/"
 
@@ -27,7 +28,7 @@ class SoundAgent(Agent):
         return self.slug.startswith("sud_")
 
     def shall_upload(self) -> bool:
-        assets_url = urljoin(config.B2_BASEURL, self.asset_path + ".wav")
+        assets_url = urljoin(config.B2_BASEURL, self.asset_path + ".opus")
         resp = requests.get(assets_url, headers={
             "Range": "Bytes=0-1"
         })
@@ -40,11 +41,18 @@ class SoundAgent(Agent):
         return list(obj.read().samples.values())[0]
 
     def upload_object(self, byt):
+        opus_byt = wav_to_opus(byt)
         upload_file(
-            byt,
-            self.asset_path + ".wav",
-            "audio/wav"
+            opus_byt,
+            self.asset_path + ".opus",
+            "audio/ogg"
+        )
+        mp3_byt = wav_to_mp3(byt)
+        upload_file(
+            mp3_byt,
+            self.asset_path + ".mp3",
+            "audio/mpeg"
         )
 
     def generate_url(self):
-        return urljoin(config.B2_BASEURL, self.asset_path + ".wav")
+        return urljoin(config.B2_BASEURL, self.asset_path + ".opus")

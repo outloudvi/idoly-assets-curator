@@ -10,6 +10,7 @@ rich = ">=12.4"
 unitypy = ">=1.8"
 cloudinary = "*"
 flask = "*"
+ffmpeg-python = "*"
 
 [dev-packages]
 autopep8 = "*"
