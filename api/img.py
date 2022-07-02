@@ -15,8 +15,7 @@ class ImageAgent(Agent):
 
     def __init__(self, slug) -> None:
         super().__init__(slug)
-        self.check_url = slug
-        path_segs = id_to_path_segs(slug)
+        path_segs = id_to_path_segs(self.slug)
         self.asset_path = path.join(
             config.CL_ASSET_DIR, *path_segs
         )
