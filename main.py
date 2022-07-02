@@ -28,14 +28,14 @@ def get_image_url(id: str, force_upload: bool = False) -> Union[str, None]:
     console.debug(f"Requesting {id}")
     path_segs = id_to_path_segs(id)
     asset_path = path.join(
-        config.ASSET_DIR, *path_segs
+        config.CL_ASSET_DIR, *path_segs
     )
-    assets_url = urljoin(config.BASEURL, asset_path + ".png")
+    assets_url = urljoin(config.CL_BASEURL, asset_path + ".png")
     if not force_upload:
         console.debug(f"Checking {assets_url}")
         if file_exists(assets_url):
             console.debug(f"Found {assets_url} , exiting")
-            return urljoin(config.BASEURL, f"f_auto/{asset_path}.png")
+            return urljoin(config.CL_BASEURL, f"f_auto/{asset_path}.png")
         console.debug(f"Not found {assets_url} , gonna download it")
     item = get_item(id)
     if item is None:
@@ -71,7 +71,7 @@ def get_image_url(id: str, force_upload: bool = False) -> Union[str, None]:
         png_bytesio_w.getvalue(),
         asset_path
     )
-    return urljoin(config.BASEURL, f"f_auto/{asset_path}.png")
+    return urljoin(config.CL_BASEURL, f"f_auto/{asset_path}.png")
 
 
 print(get_image_url("img_card_thumb_1_rui-01-eve-00"))
