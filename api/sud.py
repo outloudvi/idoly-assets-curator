@@ -1,11 +1,10 @@
 from urllib.parse import urljoin
 from os import path
-import requests
 
 import config
 from agent import Agent
 from utils import id_to_path_segs
-from upload.backblaze import upload_file
+from upload.backblaze import exists_file, upload_file
 from ffutils import wav_to_mp3, wav_to_opus
 
 PATH_PREFIX = "assets/"
@@ -29,11 +28,7 @@ class SoundAgent(Agent):
         if self.ext != "opus":
             # Only upload/convert on requesting opus, not mp3
             return False
-        assets_url = urljoin(config.B2_BASEURL, self.asset_path + ".opus")
-        resp = requests.get(assets_url, headers={
-            "Range": "Bytes=0-1"
-        })
-        return resp.status_code != 206
+        return not exists_file(self.asset_path + ".opus")
 
     def pick_item(self, items):
         return list(filter(lambda x: x.type.name == self.filter_asset_type, items))[0]

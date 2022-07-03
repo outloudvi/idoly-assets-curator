@@ -1,5 +1,6 @@
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 import config
 
 b2 = boto3.resource(
@@ -15,3 +16,13 @@ bucket = b2.Bucket(config.B2_BUCKET_NAME)
 
 def upload_file(byt: bytes, path: str, content_type: str):
     bucket.put_object(Body=byt, Key=path, ContentType=content_type)
+
+
+def exists_file(path: str) -> bool:
+    obj = bucket.Object(path)
+    try:
+        obj.load()
+    except ClientError as e:
+        if e.response.get("Error")["Code"] == "404":
+            return False
+    return True
