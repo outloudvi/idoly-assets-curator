@@ -1,7 +1,7 @@
 from flask import Flask
 
-from api.img import ImageAgent
-from api.sud import SoundAgent
+from agents.img import ImageAgent
+from agents.sud import SoundAgent
 from utils import post_agent
 
 app = Flask(__name__)

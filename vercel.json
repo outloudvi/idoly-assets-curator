@@ -1,0 +1,31 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "*.html",
+            "use": "@vercel/static"
+        },
+        {
+            "src": "api/*.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/img/(.*)",
+            "dest": "/vercel/img.py"
+        },
+        {
+            "src": "/api/sud/(.*)",
+            "dest": "/vercel/sud.py"
+        },
+        {
+            "src": "/(.*)",
+            "status": 404,
+            "dest": "/404.html"
+        }
+    ],
+    "github": {
+        "silent": true
+    }
+}
