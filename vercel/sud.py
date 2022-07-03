@@ -18,7 +18,11 @@ class handler(BaseHTTPRequestHandler):
             return
 
         slug = path[3]
-        result = SoundAgent(slug).process()
+        agent = SoundAgent(slug)
+        if not agent.shall_upload():
+            result = 302, agent.generate_url()
+        else:
+            result = 302, f"https://idoly-assets.azurewebsites.net/api/sud/{slug}"
         if result[0] == 302:
             self.send_response(302)
             self.send_header('Location', result[1])
