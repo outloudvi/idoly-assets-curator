@@ -12,6 +12,8 @@ class handler(BaseHTTPRequestHandler):
         if len(path) != 4:
             self.send_response(400)
             self.send_header('Content-type', 'text/plain')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET')
             self.end_headers()
             message = f"Invalid id in path: {path}"
             self.wfile.write(message.encode())
