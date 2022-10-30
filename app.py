@@ -1,8 +1,10 @@
 from flask import Flask
-from agents.adv import AdvAgent
 
+from agents.adv import AdvAgent
+from agents.env import EnvironmentAgent
 from agents.img import ImageAgent
 from agents.sud import SoundAgent
+
 from utils import post_agent
 
 app = Flask(__name__)
@@ -26,6 +28,13 @@ def api_snd(slug: str):
 def api_adv(slug: str):
     return post_agent(
         AdvAgent(slug).process()
+    )
+
+
+@app.route('/api/env/<slug>', methods=['GET'])
+def api_env(slug: str):
+    return post_agent(
+        EnvironmentAgent(slug).process()
     )
 
 

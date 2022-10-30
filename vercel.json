@@ -24,6 +24,10 @@
             "dest": "/vercel/adv.py"
         },
         {
+            "src": "/api/env/(.*)",
+            "dest": "/vercel/env.py"
+        },
+        {
             "src": "/(.*)",
             "status": 404,
             "dest": "/404.html"
