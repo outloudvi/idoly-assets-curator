@@ -20,6 +20,10 @@
             "dest": "/vercel/sud.py"
         },
         {
+            "src": "/api/adv/(.*)",
+            "dest": "/vercel/adv.py"
+        },
+        {
             "src": "/(.*)",
             "status": 404,
             "dest": "/404.html"
