@@ -37,7 +37,7 @@ class AdvAgent(Agent):
         upload_file(
             byt,
             self.full_path,
-            "text/plain"
+            "text/plain; charset=utf-8"
         )
 
     def process(self) -> Tuple[int, str]:
