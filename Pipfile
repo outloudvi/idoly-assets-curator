@@ -11,6 +11,7 @@ unitypy = ">=1.8"
 cloudinary = "*"
 flask = "*"
 ffmpeg-python = "*"
+python-dotenv = "*"
 
 [dev-packages]
 autopep8 = "*"
