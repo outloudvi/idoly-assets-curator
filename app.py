@@ -1,4 +1,5 @@
 from flask import Flask
+from agents.adv import AdvAgent
 
 from agents.img import ImageAgent
 from agents.sud import SoundAgent
@@ -18,6 +19,13 @@ def api_img(slug: str):
 def api_snd(slug: str):
     return post_agent(
         SoundAgent(slug).process()
+    )
+
+
+@app.route('/api/adv/<slug>', methods=['GET'])
+def api_adv(slug: str):
+    return post_agent(
+        AdvAgent(slug).process()
     )
 
 

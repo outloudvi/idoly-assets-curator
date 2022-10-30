@@ -20,16 +20,15 @@ def id_to_path_segs(id: str) -> List[str]:
     return splits
 
 
-def get_origin_url(item) -> str:
+def get_origin_url(item, typ: str = "assetbundle") -> str:
     upload_version_id = item["uploadVersionId"]
-    typ = "assetbundle"
     object_name = item["objectName"]
     generation = item["generation"]
     return f"https://d2ilil7yh5oi1v.cloudfront.net/solis-{upload_version_id}-{typ}/{object_name}?generation={generation}&alt=media"
 
 
-def get_item(name: str) -> Union[dict, None]:
-    resp = requests.get(f"{config.API_LOOKUP_URL}?name={name}",
+def get_item(name: str, typ: str = "asset") -> Union[dict, None]:
+    resp = requests.get(f"{config.API_LOOKUP_URL}/{typ}?name={name}",
                         headers={
                             "Authorization": f"Bearer {config.API_SECRET}"
                         })
