@@ -46,7 +46,7 @@ class SoundAgent(Agent):
     def __init__(self, slug) -> None:
         super().__init__(slug)
         path_segs = id_to_path_segs(self.slug)
-        if "-" in self.slug and len(self.slug.split("-")) == 2:
+        if "-" in self.slug and len(self.slug.split("-")) == 2 and self.slug.startswith("sud_vo_"):
             self.component = self.slug.split("-")[1]
             self.slug = self.slug.split("-")[0]
         self.asset_path = path.join(
