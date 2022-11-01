@@ -13,10 +13,14 @@ PATH_PREFIX = "assets/"
 class SoundAgent(Agent):
     asset_path = ""
     filter_asset_type = "AudioClip"
+    component = None
 
     def __init__(self, slug) -> None:
         super().__init__(slug)
         path_segs = id_to_path_segs(self.slug)
+        if "-" in self.slug and len(self.slug.split("-")) == 2:
+            self.component = self.slug.split("-")[1]
+            self.slug = self.slug.split("-")[0]
         self.asset_path = path.join(
             PATH_PREFIX, *path_segs
         )
@@ -31,7 +35,10 @@ class SoundAgent(Agent):
         return not exists_file(self.asset_path + ".opus")
 
     def pick_item(self, items):
-        return list(filter(lambda x: x.type.name == self.filter_asset_type, items))[0]
+        selections = list(filter(lambda x: x.type.name == self.filter_asset_type, items))
+        if self.component is not None:
+            selections = list(filter(lambda x: x.read().name == f"{self.slug}-{self.component}", selections))
+        return selections[0]
 
     def object_to_bytes(self, obj):
         return list(obj.read().samples.values())[0]
