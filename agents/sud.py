@@ -69,7 +69,9 @@ class SoundAgent(Agent):
             selected = list(filter(lambda x: x.name == f"{self.slug}-{self.component}", selections_read))
             for i in filter(lambda x: x.name != f"{self.slug}-{self.component}", selections_read):
                 executor.submit(preload_object, i)
-        return selected[0]
+            return selected[0]
+        else:
+            return selections_read[0]
 
     def object_to_bytes(self, obj):
         return list(obj.samples.values())[0]
