@@ -20,10 +20,6 @@
             "dest": "/vercel/sud.py"
         },
         {
-            "src": "/api/adv/(.*)",
-            "dest": "/vercel/adv.py"
-        },
-        {
             "src": "/api/env/(.*)",
             "dest": "/vercel/env.py"
         },
