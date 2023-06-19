@@ -2,7 +2,6 @@ from flask import Flask
 
 from agents.env import EnvironmentAgent
 from agents.img import ImageAgent
-from agents.sud import SoundAgent
 
 from utils import post_agent
 
@@ -13,13 +12,6 @@ app = Flask(__name__)
 def api_img(slug: str):
     return post_agent(
         ImageAgent(slug).process()
-    )
-
-
-@app.route('/api/sud/<slug>', methods=['GET'])
-def api_snd(slug: str):
-    return post_agent(
-        SoundAgent(slug).process()
     )
 
 

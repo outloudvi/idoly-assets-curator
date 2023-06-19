@@ -16,10 +16,6 @@
             "dest": "/vercel/img.py"
         },
         {
-            "src": "/api/sud/(.*)",
-            "dest": "/vercel/sud.py"
-        },
-        {
             "src": "/api/env/(.*)",
             "dest": "/vercel/env.py"
         },
