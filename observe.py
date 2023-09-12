@@ -130,7 +130,8 @@ def process_spi(db_items):
                 obj = filter(lambda x: x.type.name ==
                              "TextAsset", up.objects).__next__()
                 pathname = path.join(
-                    "assets/", *build_spi_basepath(name), name + ".json")
+                    # Remove .skl
+                    "assets/", *build_spi_basepath(name), name[:-4] + ".json")
                 backblaze.upload_file(
                     obj.read().text,
                     pathname,
