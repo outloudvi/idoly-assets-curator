@@ -6,6 +6,10 @@
             "use": "@vercel/static"
         },
         {
+            "src": "*.txt",
+            "use": "@vercel/static"
+        },
+        {
             "src": "vercel/*.py",
             "use": "@vercel/python"
         }
@@ -18,6 +22,10 @@
         {
             "src": "/api/env/(.*)",
             "dest": "/vercel/env.py"
+        },
+        {
+            "src": "/robots.txt",
+            "dest": "/robots.txt"
         },
         {
             "src": "/(.*)",
