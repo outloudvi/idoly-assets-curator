@@ -2,15 +2,26 @@ import config
 from typing import Tuple, Union, List
 import json
 
-from flask import redirect
+from flask import redirect, Response
 import requests
+
+POSITIVE_CACHE_TIME = 30 * 24 * 60 * 60  # 30 days
+POSITIVE_ALT_CACHE_TIME = 3 * 24 * 60 * 60  # 3 hours
+NEGATIVE_CACHE_TIME = 30 * 60  # 30 minutes
 
 
 def post_agent(ret: Tuple[int, str]):
     if ret[0] == 302:
-        return redirect(ret[1], code=ret[0])
+        response = redirect(ret[1], code=ret[0])
+        response.headers.add('Cache-Control',
+                             f's-maxage={POSITIVE_CACHE_TIME}, stale-while-revalidate={POSITIVE_ALT_CACHE_TIME}')
+        return response
     else:
-        return ret[1], ret[0]
+        response = Response(ret[1])
+        response.status_code = ret[0]
+        response.headers.add(
+            'Cache-Control', f's-maxage={NEGATIVE_CACHE_TIME}')
+        return response
 
 
 def id_to_path_segs(id: str) -> List[str]:
