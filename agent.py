@@ -38,7 +38,7 @@ class Agent:
             return 400, "Bad slug"
 
         if not self.shall_upload():
-            return 302, self.generate_url()
+            return 308, self.generate_url()
 
         console.debug("get_item_meta")
         item = get_item(self.slug)
@@ -66,4 +66,4 @@ class Agent:
         console.debug("upload")
         self.upload_object(data)
 
-        return 302, self.generate_url()
+        return 308, self.generate_url()

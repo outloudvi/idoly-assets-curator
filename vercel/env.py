@@ -22,8 +22,8 @@ class handler(BaseHTTPRequestHandler):
 
         slug = path[3]
         result = EnvironmentAgent(slug).process()
-        if result[0] == 302:
-            self.send_response(302)
+        if result[0] == 308:
+            self.send_response(308)
             self.send_header('Location', result[1])
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Allow-Methods', 'GET')

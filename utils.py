@@ -11,7 +11,7 @@ NEGATIVE_CACHE_TIME = 30 * 60  # 30 minutes
 
 
 def post_agent(ret: Tuple[int, str]):
-    if ret[0] == 302:
+    if ret[0] == 308:
         response = redirect(ret[1], code=ret[0])
         response.headers.add('Cache-Control',
                              f's-maxage={POSITIVE_CACHE_TIME}, stale-while-revalidate={POSITIVE_ALT_CACHE_TIME}')
