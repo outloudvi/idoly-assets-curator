@@ -2,9 +2,12 @@ from typing import Tuple
 from console import console
 from deobfuscate import deobfuscate
 from utils import get_item, get_origin_url
+from constants import UNITY_VERSION
 
 import requests
 import UnityPy
+
+UnityPy.config.FALLBACK_UNITY_VERSION = UNITY_VERSION
 
 
 class Agent:
