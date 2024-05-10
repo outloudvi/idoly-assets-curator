@@ -10,9 +10,12 @@ import UnityPy
 import backblaze
 import config
 from console import console
+from constants import UNITY_VERSION
 import utils
 import ffutils
 import deobfuscate
+
+UnityPy.config.FALLBACK_UNITY_VERSION = UNITY_VERSION
 
 SUD_METAFILE_PATH = 'assets/sud/meta.json'
 SPI_METAFILE_PATH = 'assets/spi/meta.json'
