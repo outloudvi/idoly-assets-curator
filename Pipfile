@@ -15,4 +15,4 @@ unitypy = ">=1.10.13"
 autopep8 = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3"
