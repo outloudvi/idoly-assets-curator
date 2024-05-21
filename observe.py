@@ -30,6 +30,7 @@ def process_sud(db_items):
     storage_metadata = json.loads(backblaze.get_file(SUD_METAFILE_PATH))
 
     failure = 0
+    handled_files = 0
     for item in filter(lambda x: x['name'].startswith("sud_"), db_items['assetBundleList']):
         name = item['name']
         storage_info = storage_metadata.get(name)
@@ -77,6 +78,12 @@ def process_sud(db_items):
             failure += 1
         storage_metadata[name] = item['md5']
 
+        handled_files += 1
+        if handled_files % 100 == 0:
+            print(f"Saving status after handling {handled_files} files.")
+            backblaze.upload_file(json.dumps(storage_metadata),
+                                  SUD_METAFILE_PATH, "application/json")
+
     # Finally...
     backblaze.upload_file(json.dumps(storage_metadata),
                           SUD_METAFILE_PATH, "application/json")
@@ -92,6 +99,7 @@ def process_spi(db_items):
     storage_metadata = json.loads(backblaze.get_file(SPI_METAFILE_PATH))
 
     failure = 0
+    handled_files = 0
     for item in filter(lambda x: x['name'].startswith("spi_"), db_items['assetBundleList']):
         name = item['name']
         storage_info = storage_metadata.get(name)
@@ -158,6 +166,12 @@ def process_spi(db_items):
             console.error(f"Exception on {name}: {e}")
             failure += 1
         storage_metadata[name] = item['md5']
+
+        handled_files += 1
+        if handled_files % 400 == 0:
+            print(f"Saving status after handling {handled_files} files.")
+            backblaze.upload_file(json.dumps(storage_metadata),
+                                  SUD_METAFILE_PATH, "application/json")
 
     # Finally...
     backblaze.upload_file(json.dumps(storage_metadata),
