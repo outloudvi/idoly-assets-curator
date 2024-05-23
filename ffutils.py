@@ -8,10 +8,10 @@ ffmpeg_path = os.path.join(dir_path, "ffmpeg")
 
 def ffmpeg_convert_format(byt, infmt, outfmt):
     try:
-        (out, err) = ffmpeg.input("pipe:", format=infmt).input("pipe:", format=infmt).output(
-            "pipe:", format=outfmt).run(cmd=ffmpeg_path, input=byt, capture_stdout=True)
+        (out, err) = ffmpeg.input("pipe:", format=infmt).output(
+            "pipe:", format=outfmt).run(cmd=ffmpeg_path, input=byt, capture_stdout=True, capture_stderr=True)
         return out
-    except Exception as e:
+    except ffmpeg.Error as e:
         print(f"Exception when calling ffmpeg: {e}")
         print(e.stderr)
         raise e
