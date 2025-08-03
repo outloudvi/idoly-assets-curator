@@ -9,7 +9,7 @@ ffmpeg-python = ">=0.2.0"
 python-dotenv = ">=1.0.1"
 requests = ">=2.27"
 rich = ">=12.4"
-unitypy = ">=1.10.13"
+unitypy = ">=1.10.18"
 
 [dev-packages]
 autopep8 = "*"
