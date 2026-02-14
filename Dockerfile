@@ -28,6 +28,9 @@ FROM python:3.12-slim-bookworm
 # Python executable must be the same, e.g., using `python:3.11-slim-bookworm`
 # will fail.
 
+LABEL org.opencontainers.image.source=https://github.com/outloudvi/idoly-assets-curator
+LABEL org.opencontainers.image.licenses=AGPL-3.0-only
+
 RUN apt-get update && \
     apt-get install -y ffmpeg && \
     rm -rf /var/lib/apt/lists/*
