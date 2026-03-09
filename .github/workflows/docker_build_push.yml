@@ -31,7 +31,7 @@ jobs:
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
         with:
           context: .
-          push: false
+          push: true
           tags: ghcr.io/outloudvi/idoly-assets-curator:latest
 
       - name: Install cosign
@@ -44,8 +44,4 @@ jobs:
           IMAGE=ghcr.io/outloudvi/idoly-assets-curator:latest
 
           cosign version
-          cosign sign --yes --keyless "$IMAGE"
-
-      - name: Push image
-        run: |
-          docker push ghcr.io/outloudvi/idoly-assets-curator:latest
+          cosign sign "$IMAGE"
