@@ -6,19 +6,20 @@ from agents.img import ImageAgent
 from utils import post_agent
 
 app = Flask(__name__)
+global_cache: set[str] = set()
 
 
 @app.route('/api/img/<slug>', methods=['GET'])
 def api_img(slug: str):
     return post_agent(
-        ImageAgent(slug).process()
+        ImageAgent(slug).process(global_cache)
     )
 
 
 @app.route('/api/env/<slug>', methods=['GET'])
 def api_env(slug: str):
     return post_agent(
-        EnvironmentAgent(slug).process()
+        EnvironmentAgent(slug).process(global_cache)
     )
 
 

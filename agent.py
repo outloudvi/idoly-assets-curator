@@ -35,12 +35,16 @@ class Agent:
     def generate_url(self):
         pass
 
-    def process(self) -> Tuple[int, str]:
+    def process(self, global_cache: set[str]) -> Tuple[int, str]:
         console.debug("pre_check")
         if self.pre_check() == False:
             return 400, "Bad slug"
 
-        if not self.shall_upload():
+        already_checked = self.slug in global_cache
+        if already_checked or not self.shall_upload():
+            if already_checked:
+                console.debug("cache_hit")
+            global_cache.add(self.slug)
             return 308, self.generate_url()
 
         console.debug("get_item_meta")
@@ -68,5 +72,6 @@ class Agent:
 
         console.debug("upload")
         self.upload_object(data)
+        global_cache.add(self.slug)
 
         return 308, self.generate_url()
