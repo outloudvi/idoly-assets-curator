@@ -43,4 +43,4 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
         run: |
           cosign version
-          cosign sign "ghcr.io/outloudvi/idoly-assets-curator:${{ steps.build.outputs.digest }}"
+          cosign sign "ghcr.io/outloudvi/idoly-assets-curator@${{ steps.build.outputs.digest }}"
