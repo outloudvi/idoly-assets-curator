@@ -28,7 +28,14 @@ class ImageAgent(Agent):
         resp = requests.get(assets_url, headers={
             "Range": "Bytes=0-1"
         })
-        return resp.status_code != 206
+        if resp.status_code != 206:
+            return True
+
+        assets_url_webp = urljoin(config.CL_BASEURL, self.asset_path + ".webp")
+        resp_webp = requests.get(assets_url_webp, headers={
+            "Range": "Bytes=0-1"
+        })
+        return resp_webp.status_code != 206
 
     def pick_item(self, items):
         return list(filter(lambda x: x.type.name == self.filter_asset_type, items))[0]
@@ -38,12 +45,12 @@ class ImageAgent(Agent):
 
     def upload_object(self, byt):
         png_bytesio_w = io.BytesIO()
-        byt.save(png_bytesio_w, format='PNG')
+        byt.save(png_bytesio_w, format='WEBP')
         upload_file(
             png_bytesio_w.getvalue(),
             self.asset_path,
-            "image/png"
+            "image/webp"
         )
 
     def generate_url(self):
-        return urljoin(config.CL_BASEURL, f"f_auto/{self.asset_path}.png")
+        return urljoin(config.CL_BASEURL, f"f_auto/{self.asset_path}.webp")
