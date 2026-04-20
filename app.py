@@ -1,12 +1,24 @@
-from flask import Flask
+from time import perf_counter
+from flask import Flask, request, g
 
 from agents.env import EnvironmentAgent
 from agents.img import ImageAgent
-
-from utils import post_agent
+from utils import log_to_umami, post_agent
 
 app = Flask(__name__)
 global_cache: set[str] = set()
+
+
+@app.before_request
+def before_request():
+    g.start_time = perf_counter()
+
+
+@app.after_request
+def after_request(response):
+    duration = perf_counter() - g.start_time
+    log_to_umami(request, duration)
+    return response
 
 
 @app.route('/api/img/<slug>', methods=['GET'])

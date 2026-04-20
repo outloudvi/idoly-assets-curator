@@ -3,6 +3,7 @@ from console import console
 from deobfuscate import deobfuscate
 from utils import get_item, get_origin_url
 from constants import UNITY_VERSION
+from flask import g
 
 import requests
 import UnityPy
@@ -44,7 +45,9 @@ class Agent:
         if already_checked or not self.shall_upload():
             if already_checked:
                 console.debug("cache_hit")
+                g.cache_hit = True
             global_cache.add(self.slug)
+            g.storage_hit = True
             return 308, self.generate_url()
 
         console.debug("get_item_meta")

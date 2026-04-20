@@ -2,7 +2,7 @@ import config
 from typing import Tuple, Union, List
 import json
 
-from flask import redirect, Response
+from flask import g, redirect, Response, Request
 import requests
 
 POSITIVE_CACHE_TIME = 30 * 24 * 60 * 60  # 30 days
@@ -42,7 +42,31 @@ def get_item(name: str, typ: str = "asset") -> Union[dict, None]:
     resp = requests.get(f"{config.API_LOOKUP_URL}/{typ}?name={name}",
                         headers={
                             "Authorization": f"Bearer {config.API_SECRET}"
-                        })
+    })
     if resp.status_code != 200:
         return None
     return json.loads(resp.text)
+
+
+def log_to_umami(request: Request, duration: int):
+    if config.UMAMI_WEBSITE_ID is None or config.UMAMI_DOMAIN is None:
+        return
+    body = {
+        "payload": {
+            "website": config.UMAMI_WEBSITE_ID,
+            "url": request.url,
+            "referrer": request.referrer or "",
+            "ip": request.remote_addr,
+            "user_agent": request.headers.get("User-Agent", "Unknown-User-Agent/0.1"),
+            "data": {
+                "duration": duration,
+                "storage_hit": g.storage_hit or False
+            }
+        },
+        "type": "event"
+    }
+    requests.post(
+        f"https://{config.UMAMI_DOMAIN}/api/send",
+        json=body,
+        timeout=2
+    )
