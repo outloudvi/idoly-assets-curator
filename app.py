@@ -17,7 +17,10 @@ def before_request():
 @app.after_request
 def after_request(response):
     duration = perf_counter() - g.start_time
-    log_to_umami(request, duration)
+    try:
+        log_to_umami(request, duration)
+    except Exception as e:
+        print(f"Error logging requests: {str(e)}")
     return response
 
 
