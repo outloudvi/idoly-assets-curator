@@ -60,7 +60,7 @@ def log_to_umami(request: Request, duration: int):
             "user_agent": request.headers.get("User-Agent", "Unknown-User-Agent/0.1"),
             "data": {
                 "duration": duration,
-                "storage_hit": g.storage_hit or False
+                "storage_hit": g.get("storage_hit", False)
             }
         },
         "type": "event"
