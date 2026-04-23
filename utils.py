@@ -1,6 +1,7 @@
 import config
 from typing import Tuple, Union, List
 import json
+import threading
 
 from flask import g, redirect, Response, Request
 import requests
@@ -48,6 +49,17 @@ def get_item(name: str, typ: str = "asset") -> Union[dict, None]:
     return json.loads(resp.text)
 
 
+def _send_umami_log(body: dict):
+    try:
+        requests.post(
+            f"https://{config.UMAMI_DOMAIN}/api/send",
+            json=body,
+            timeout=2
+        )
+    except Exception as e:
+        print(f"Umami logging failed: {e}")
+
+
 def log_to_umami(request: Request, duration: int):
     if config.UMAMI_WEBSITE_ID is None or config.UMAMI_DOMAIN is None:
         return
@@ -65,8 +77,4 @@ def log_to_umami(request: Request, duration: int):
         },
         "type": "event"
     }
-    requests.post(
-        f"https://{config.UMAMI_DOMAIN}/api/send",
-        json=body,
-        timeout=2
-    )
+    threading.Thread(target=_send_umami_log, args=(body,), daemon=True).start()
