@@ -49,11 +49,12 @@ def get_item(name: str, typ: str = "asset") -> Union[dict, None]:
     return json.loads(resp.text)
 
 
-def _send_umami_log(body: dict):
+def _send_umami_log(body: dict, headers: dict):
     try:
         requests.post(
             f"https://{config.UMAMI_DOMAIN}/api/send",
             json=body,
+            headers=headers,
             timeout=2
         )
     except Exception as e:
@@ -69,7 +70,6 @@ def log_to_umami(request: Request, duration: int):
             "url": request.url,
             "referrer": request.referrer or "",
             "ip": request.remote_addr,
-            "user_agent": request.headers.get("User-Agent", "Unknown-User-Agent/0.1"),
             "data": {
                 "duration": duration,
                 "storage_hit": g.get("storage_hit", False)
@@ -77,4 +77,9 @@ def log_to_umami(request: Request, duration: int):
         },
         "type": "event"
     }
-    threading.Thread(target=_send_umami_log, args=(body,), daemon=True).start()
+    headers = {
+        "User-Agent": request.headers.get("User-Agent", "Unknown-User-Agent/0.1"),
+        "X-Forwarded-For":  request.headers.get("X-Forwarded-For"),
+    }
+    threading.Thread(target=_send_umami_log, args=(
+        body, headers), daemon=True).start()
