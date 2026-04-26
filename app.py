@@ -3,7 +3,7 @@ from flask import Flask, request, g
 
 from agents.env import EnvironmentAgent
 from agents.img import ImageAgent
-from utils import log_to_umami, post_agent
+from utils import log_to_matomo, post_agent
 
 app = Flask(__name__)
 global_cache: set[str] = set()
@@ -18,7 +18,7 @@ def before_request():
 def after_request(response):
     duration = perf_counter() - g.start_time
     try:
-        log_to_umami(request, duration)
+        log_to_matomo(request, duration)
     except Exception as e:
         print(f"Error logging requests: {str(e)}")
     return response

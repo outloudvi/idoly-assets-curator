@@ -2,6 +2,7 @@ import config
 from typing import Tuple, Union, List
 import json
 import threading
+import random
 
 from flask import g, redirect, Response, Request
 import requests
@@ -49,37 +50,39 @@ def get_item(name: str, typ: str = "asset") -> Union[dict, None]:
     return json.loads(resp.text)
 
 
-def _send_umami_log(body: dict, headers: dict):
+def _send_matomo_log(url: str, params: dict):
     try:
-        requests.post(
-            f"https://{config.UMAMI_DOMAIN}/api/send",
-            json=body,
-            headers=headers,
-            timeout=2
-        )
+        requests.post(url, params=params, timeout=2)
     except Exception as e:
-        print(f"Umami logging failed: {e}")
+        print(f"Matomo logging failed: {e}")
 
 
-def log_to_umami(request: Request, duration: int):
-    if config.UMAMI_WEBSITE_ID is None or config.UMAMI_DOMAIN is None:
+def log_to_matomo(request: Request, duration: int):
+    if config.MATOMO_DOMAIN is None or config.MATOMO_WEBSITE_ID is None:
         return
-    body = {
-        "payload": {
-            "website": config.UMAMI_WEBSITE_ID,
-            "url": request.url,
-            "referrer": request.referrer or "",
-            "ip": request.remote_addr,
-            "data": {
-                "duration": duration,
-                "storage_hit": g.get("storage_hit", False)
-            }
-        },
-        "type": "event"
+
+    is_cloudflare = (config.IS_BEHIND_CLOUDFLARE or "").lower() == 'true'
+
+    cip = request.headers.get(
+        'Cf-Connecting-Ip') if is_cloudflare else ''
+    country = (request.headers.get('Cf-Ipcountry')
+               or '').lower() if is_cloudflare else ''
+
+    params = {
+        "idsite": config.MATOMO_WEBSITE_ID,
+        "rec": 1,
+        "url": request.url,
+        "rand": str(random.random()),
+        "apiv": 1,
+        "urlref": request.headers.get('Referer'),
+        "ua": request.headers.get('User-Agent'),
+        "lang": request.headers.get('Accept-Language'),
+        "token_auth": config.MATOMO_TOKEN,
+        "cip": cip,
+        "country": country,
+        "pf_srv": duration * 1000
     }
-    headers = {
-        "User-Agent": request.headers.get("User-Agent", "Unknown-User-Agent/0.1"),
-        "X-Forwarded-For":  request.headers.get("X-Forwarded-For"),
-    }
-    threading.Thread(target=_send_umami_log, args=(
-        body, headers), daemon=True).start()
+
+    url = f"https://{config.MATOMO_DOMAIN}/matomo.php"
+    threading.Thread(target=_send_matomo_log, args=(
+        url, params), daemon=True).start()
