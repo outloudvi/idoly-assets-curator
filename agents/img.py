@@ -24,13 +24,6 @@ class ImageAgent(Agent):
         return self.slug.startswith("img_")
 
     def shall_upload(self) -> bool:
-        assets_url = urljoin(config.CL_BASEURL, self.asset_path + ".png")
-        resp = requests.get(assets_url, headers={
-            "Range": "Bytes=0-1"
-        })
-        if resp.status_code != 206:
-            return True
-
         assets_url_webp = urljoin(config.CL_BASEURL, self.asset_path + ".webp")
         resp_webp = requests.get(assets_url_webp, headers={
             "Range": "Bytes=0-1"
