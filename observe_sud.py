@@ -10,7 +10,8 @@ if __name__ == '__main__':
         requests.get(OCTO_API_ENDPOINT,
                      headers={
                          "Authorization": f"Bearer {config.API_SECRET}"
-                     }).content
+                     },
+                     timeout=10).content
     )
     success = process_sud(db_items)
     if not success:

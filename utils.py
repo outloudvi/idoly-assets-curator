@@ -1,7 +1,5 @@
 import config
-from typing import Tuple, Union, List
-import json
-import requests
+from typing import List
 
 
 def id_to_path_segs(id: str) -> List[str]:
@@ -18,8 +16,8 @@ def get_origin_url(item, typ: str = "assetbundle") -> str:
     return f"https://{config.UPSTREAM_BASE_DOMAIN}/solis-{upload_version_id}-{typ}/{object_name}?generation={generation}&alt=media"
 
 
-def next_or_none(iter):
+def next_or_none(iterator):
     try:
-        return next(iter)
+        return next(iterator)
     except StopIteration:
         return None

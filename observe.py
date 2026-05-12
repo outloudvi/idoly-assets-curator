@@ -15,7 +15,7 @@ import utils
 import ffutils
 import deobfuscate
 
-UnityPy.config.FALLBACK_UNITY_VERSION = UNITY_VERSION
+UnityPy.config.FALLBACK_UNITY_VERSION = UNITY_VERSION  # type: ignore
 
 SUD_METAFILE_PATH = 'assets/sud/meta.json'
 SPI_METAFILE_PATH = 'assets/spi/meta.json'
@@ -47,7 +47,7 @@ def process_sud(db_items):
         try:
             console.log(f"Handling {name}")
             origin_url = utils.get_origin_url(item)
-            blob = requests.get(origin_url).content
+            blob = requests.get(origin_url, timeout=10).content
             time.sleep(1)  # lower the upstream request rate
             u3d_blob = deobfuscate.deobfuscate(blob, item)
             if u3d_blob[0:7] != b'UnityFS':
@@ -57,7 +57,7 @@ def process_sud(db_items):
             up = UnityPy.load(u3d_blob)
             for clip in filter(lambda x: x.type.name == "AudioClip", up.objects):
                 clip_item = clip.read()
-                clip_name = clip_item.name
+                clip_name = clip_item.m_Name
                 clip_samples = clip_item.samples
                 if len(clip_samples) > 1:
                     console.warn(
@@ -80,11 +80,11 @@ def process_sud(db_items):
         handled_files += 1
         if handled_files % 100 == 0:
             print(f"Saving status after handling {handled_files} files.")
-            backblaze.upload_file(json.dumps(storage_metadata),
+            backblaze.upload_file(json.dumps(storage_metadata).encode("utf-8"),
                                   SUD_METAFILE_PATH, "application/json")
 
     # Finally...
-    backblaze.upload_file(json.dumps(storage_metadata),
+    backblaze.upload_file(json.dumps(storage_metadata).encode("utf-8"),
                           SUD_METAFILE_PATH, "application/json")
     if failure == 0:
         console.log("Everything goes well")
@@ -98,7 +98,7 @@ def process_spi_item(item) -> bool:
     name = item['name']
     console.log(f"Handling {name}")
     origin_url = utils.get_origin_url(item)
-    blob = requests.get(origin_url).content
+    blob = requests.get(origin_url, timeout=10).content
     time.sleep(1)  # lower the upstream request rate
     u3d_blob = deobfuscate.deobfuscate(blob, item)
     if u3d_blob[0:7] != b'UnityFS':
@@ -184,11 +184,11 @@ def process_spi(db_items):
         handled_files += 1
         if handled_files % 400 == 0:
             print(f"Saving status after handling {handled_files} files.")
-            backblaze.upload_file(json.dumps(storage_metadata),
+            backblaze.upload_file(json.dumps(storage_metadata).encode("utf-8"),
                                   SUD_METAFILE_PATH, "application/json")
 
     # Finally...
-    backblaze.upload_file(json.dumps(storage_metadata),
+    backblaze.upload_file(json.dumps(storage_metadata).encode("utf-8"),
                           SPI_METAFILE_PATH, "application/json")
     if failure == 0:
         console.log("Everything goes well")
@@ -203,7 +203,8 @@ if __name__ == '__main__':
         requests.get(OCTO_API_ENDPOINT,
                      headers={
                          "Authorization": f"Bearer {config.API_SECRET}"
-                     }).content
+                     },
+                     timeout=10).content
     )
     success_sud = process_sud(db_items)
     success_spi = process_spi(db_items)
