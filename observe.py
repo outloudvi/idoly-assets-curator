@@ -36,7 +36,6 @@ def process_sud(db_items):
         storage_info = storage_metadata.get(name)
         if storage_info is not None:
             if storage_info == item['md5']:
-                console.log(f"Skipping {name}")
                 continue
             else:
                 console.log(f"Updating {name}")
@@ -105,7 +104,6 @@ def process_spi(db_items):
         storage_info = storage_metadata.get(name)
         if storage_info is not None:
             if storage_info == item['md5']:
-                console.log(f"Skipping {name}")
                 continue
             else:
                 console.log(f"Updating {name}")
