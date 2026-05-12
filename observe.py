@@ -94,6 +94,66 @@ def process_sud(db_items):
         return False
 
 
+def process_spi_item(item) -> bool:
+    name = item['name']
+    console.log(f"Handling {name}")
+    origin_url = utils.get_origin_url(item)
+    blob = requests.get(origin_url).content
+    time.sleep(1)  # lower the upstream request rate
+    u3d_blob = deobfuscate.deobfuscate(blob, item)
+    if u3d_blob[0:7] != b'UnityFS':
+        console.warn(f"Skipping {name} due to invalid UnityFS header")
+        return False
+    up = UnityPy.load(u3d_blob)
+    if name.endswith(".atlas"):
+        # atlas file - plaintext
+        obj = utils.next_or_none(filter(lambda x: x.type.name ==
+                                        "TextAsset", up.objects))
+        if obj is None:
+            console.warn(f"No TextAsset found in {name}")
+            return True
+        pathname = path.join(
+            "assets/", *build_spi_basepath(name), name)
+        backblaze.upload_file(
+            obj.read().text,
+            pathname,
+            "text/plain"
+        )
+    elif name.endswith(".skl"):
+        # skl file - JSON
+        obj = utils.next_or_none(filter(lambda x: x.type.name ==
+                                        "TextAsset", up.objects))
+        if obj is None:
+            console.warn(f"No TextAsset found in {name}")
+            return True
+        pathname = path.join(
+            # Remove .skl
+            "assets/", *build_spi_basepath(name), name[:-4] + ".json")
+        backblaze.upload_file(
+            obj.read().text,
+            pathname,
+            "application/json"
+        )
+    else:
+        # texture file - PNG
+        obj = utils.next_or_none(filter(lambda x: x.type.name ==
+                                        "Texture2D", up.objects))
+        if obj is None:
+            console.warn(f"No Texture2D found in {name}")
+            return True
+        pathname = path.join(
+            "assets/", *build_spi_basepath(name), name + ".png")
+        png_bytesio_w = BytesIO()
+        obj.read().image.save(png_bytesio_w, format='PNG')
+        backblaze.upload_file(
+            png_bytesio_w.getvalue(),
+            pathname,
+            "image/png"
+        )
+    console.log(f"Uploaded {name} to {pathname}")
+    return True
+
+
 def process_spi(db_items):
     storage_metadata = json.loads(backblaze.get_file(SPI_METAFILE_PATH))
 
@@ -113,53 +173,9 @@ def process_spi(db_items):
         # Process an item
         # I guess we don't need to run in parallel here, to be kind to the upstream server
         try:
-            console.log(f"Handling {name}")
-            origin_url = utils.get_origin_url(item)
-            blob = requests.get(origin_url).content
-            time.sleep(1)  # lower the upstream request rate
-            u3d_blob = deobfuscate.deobfuscate(blob, item)
-            if u3d_blob[0:7] != b'UnityFS':
-                console.warn(f"Skipping {name} due to invalid UnityFS header")
+            result = process_spi_item(item)
+            if result is False:
                 failure += 1
-                continue
-            up = UnityPy.load(u3d_blob)
-            if name.endswith(".atlas"):
-                # atlas file - plaintext
-                obj = filter(lambda x: x.type.name ==
-                             "TextAsset", up.objects).__next__()
-                pathname = path.join(
-                    "assets/", *build_spi_basepath(name), name)
-                backblaze.upload_file(
-                    obj.read().text,
-                    pathname,
-                    "text/plain"
-                )
-            elif name.endswith(".skl"):
-                # skl file - JSON
-                obj = filter(lambda x: x.type.name ==
-                             "TextAsset", up.objects).__next__()
-                pathname = path.join(
-                    # Remove .skl
-                    "assets/", *build_spi_basepath(name), name[:-4] + ".json")
-                backblaze.upload_file(
-                    obj.read().text,
-                    pathname,
-                    "application/json"
-                )
-            else:
-                # texture file - PNG
-                obj = filter(lambda x: x.type.name ==
-                             "Texture2D", up.objects).__next__()
-                pathname = path.join(
-                    "assets/", *build_spi_basepath(name), name + ".png")
-                png_bytesio_w = BytesIO()
-                obj.read().image.save(png_bytesio_w, format='PNG')
-                backblaze.upload_file(
-                    png_bytesio_w.getvalue(),
-                    pathname,
-                    "image/png"
-                )
-            console.log(f"Uploaded {name} to {pathname}")
         except Exception as e:
             console.error(f"Exception on {name}: {e}")
             failure += 1

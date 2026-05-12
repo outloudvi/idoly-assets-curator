@@ -16,3 +16,10 @@ def get_origin_url(item, typ: str = "assetbundle") -> str:
     object_name = item["objectName"]
     generation = item["generation"]
     return f"https://{config.UPSTREAM_BASE_DOMAIN}/solis-{upload_version_id}-{typ}/{object_name}?generation={generation}&alt=media"
+
+
+def next_or_none(iter):
+    try:
+        return next(iter)
+    except StopIteration:
+        return None
