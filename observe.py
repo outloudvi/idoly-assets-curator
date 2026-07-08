@@ -71,7 +71,7 @@ def process_sud(db_items):
                     pathname,
                     "audio/ogg"
                 )
-                console.log(f"Uploaded {clip_item.name} to {pathname}")
+                console.log(f"Uploaded {clip_name} to {pathname}")
         except Exception as e:
             console.error(f"Exception on {name}: {e}")
             failure += 1
@@ -114,11 +114,15 @@ def process_spi_item(item) -> bool:
             return True
         pathname = path.join(
             "assets/", *build_spi_basepath(name), name)
-        backblaze.upload_file(
-            obj.read().text,
-            pathname,
-            "text/plain"
-        )
+        object_name_text = obj.read().get("text")
+        if object_name_text is None:
+            console.warn(f"No text name found in {name}")
+        else:
+            backblaze.upload_file(
+                object_name_text,
+                pathname,
+                "text/plain"
+            )
     elif name.endswith(".skl"):
         # skl file - JSON
         obj = utils.next_or_none(filter(lambda x: x.type.name ==
