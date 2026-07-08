@@ -19,7 +19,7 @@ UnityPy.config.FALLBACK_UNITY_VERSION = UNITY_VERSION  # type: ignore
 
 SUD_METAFILE_PATH = 'assets/sud/meta.json'
 SPI_METAFILE_PATH = 'assets/spi/meta.json'
-OCTO_API_ENDPOINT = 'https://idoly-backend.outv.im/manage/raw?key=Octo'
+OCTO_API_ENDPOINT = 'https://idoly-backend.outv.im/manage/raw?key=Octo_assetBundleList'
 
 
 def build_spi_basepath(name):
@@ -31,7 +31,7 @@ def process_sud(db_items):
 
     failure = 0
     handled_files = 0
-    for item in filter(lambda x: x['name'].startswith("sud_"), db_items['assetBundleList']):
+    for item in filter(lambda x: x['name'].startswith("sud_"), db_items):
         name = item['name']
         storage_info = storage_metadata.get(name)
         if storage_info is not None:
@@ -159,7 +159,7 @@ def process_spi(db_items):
 
     failure = 0
     handled_files = 0
-    for item in filter(lambda x: x['name'].startswith("spi_"), db_items['assetBundleList']):
+    for item in filter(lambda x: x['name'].startswith("spi_"), db_items):
         name = item['name']
         storage_info = storage_metadata.get(name)
         if storage_info is not None:
