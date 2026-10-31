@@ -30,10 +30,7 @@ class LocalIPRateLimiter:
             timestamps = [row[0] for row in db.execute(
                 'SELECT requested_at FROM rate_requests WHERE ip = ? '
                 'ORDER BY requested_at', (ip,))]
-            minute = [stamp for stamp in timestamps if stamp > now - 60]
             retry = 0
-            if len(minute) >= 30:
-                retry = max(retry, math.ceil(minute[-30] + 60 - now))
             if len(timestamps) >= 600:
                 retry = max(retry, math.ceil(timestamps[-600] + 3600 - now))
             if retry:

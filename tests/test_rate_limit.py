@@ -19,11 +19,11 @@ class RateLimitTests(unittest.TestCase):
         self.now = 10000.0
         self.limiter = LocalIPRateLimiter(self.path, clock=lambda: self.now)
 
-    def test_minute_boundary_and_independent_ips(self):
-        self.assertEqual([self.limiter.check('a') for _ in range(30)], [0] * 30)
-        self.assertEqual(self.limiter.check('a'), 60)
+    def test_hour_boundary_and_independent_ips(self):
+        self.assertEqual([self.limiter.check('a') for _ in range(600)], [0] * 600)
+        self.assertEqual(self.limiter.check('a'), 3600)
         self.assertEqual(self.limiter.check('b'), 0)
-        self.now += 59.1
+        self.now += 3599.1
         self.assertEqual(self.limiter.check('a'), 1)
         self.now += 0.9
         self.assertEqual(self.limiter.check('a'), 0)
@@ -42,15 +42,15 @@ class RateLimitTests(unittest.TestCase):
         def check(_):
             return LocalIPRateLimiter(self.path, clock=lambda: self.now).check('a')
         with ThreadPoolExecutor(max_workers=8) as pool:
-            results = list(pool.map(check, range(50)))
-        self.assertEqual(results.count(0), 30)
-        self.assertEqual(results.count(60), 20)
+            results = list(pool.map(check, range(700)))
+        self.assertEqual(results.count(0), 600)
+        self.assertEqual(results.count(3600), 100)
 
     def test_shared_database_across_processes(self):
         script = (
             'import sys; from rate_limit import LocalIPRateLimiter; '
             'limiter = LocalIPRateLimiter(sys.argv[1], clock=lambda: 10000.0); '
-            'print(sum(limiter.check("shared") == 0 for _ in range(15)))'
+            'print(sum(limiter.check("shared") == 0 for _ in range(200)))'
         )
         processes = [subprocess.Popen(
             [sys.executable, '-c', script, self.path],
@@ -61,7 +61,7 @@ class RateLimitTests(unittest.TestCase):
             stdout, stderr = process.communicate(timeout=30)
             self.assertEqual(process.returncode, 0, stderr)
             accepted += int(stdout.strip())
-        self.assertEqual(accepted, 30)
+        self.assertEqual(accepted, 600)
 
     def test_forwarded_headers_are_not_trusted_by_default(self):
         with patch.object(config, 'IS_BEHIND_CLOUDFLARE', None):
@@ -86,12 +86,12 @@ class RateLimitTests(unittest.TestCase):
 
     def test_requests_share_quota_within_subnet(self):
         with patch.object(rate_limit, 'limiter', self.limiter):
-            for _ in range(30):
+            for _ in range(600):
                 self.assertIsNone(rate_limit.check_request('192.0.2.1', {}))
             self.assertEqual(rate_limit.check_request('192.0.2.254', {})[0], 429)
             self.assertIsNone(rate_limit.check_request('192.0.3.1', {}))
 
-            for _ in range(29):
+            for _ in range(599):
                 self.assertIsNone(rate_limit.check_request('2001:db8:1234::1', {}))
             self.assertIsNone(rate_limit.check_request('2001:db8:1234:ffff::1', {}))
             self.assertEqual(rate_limit.check_request('2001:db8:1234:abcd::1', {})[0], 429)
@@ -99,11 +99,11 @@ class RateLimitTests(unittest.TestCase):
 
     def test_response_headers_and_database_failure(self):
         with patch.object(rate_limit, 'limiter', self.limiter):
-            for _ in range(30):
+            for _ in range(600):
                 self.assertIsNone(rate_limit.check_request('192.0.2.1', {}))
             status, _, headers = rate_limit.check_request('192.0.2.1', {})
             self.assertEqual(status, 429)
-            self.assertEqual(headers, {'Retry-After': '60', 'Cache-Control': 'no-store'})
+            self.assertEqual(headers, {'Retry-After': '3600', 'Cache-Control': 'no-store'})
         broken = LocalIPRateLimiter(os.path.join(self.path, 'missing'))
         with patch.object(rate_limit, 'limiter', broken):
             self.assertEqual(rate_limit.check_request('192.0.2.1', {})[0], 503)

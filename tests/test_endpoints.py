@@ -23,13 +23,13 @@ class EndpointTests(unittest.TestCase):
     def test_flask_limits_shared_across_routes_before_processing(self):
         with app.app.test_client() as client, patch.object(
                 app.ImageAgent, 'process', return_value=(308, 'https://cdn.example/test.webp')) as process:
-            for _ in range(30):
+            for _ in range(600):
                 self.assertEqual(client.get('/api/img/img_test').status_code, 308)
             response = client.get('/api/env/env_test')
             self.assertEqual(response.status_code, 429)
-            self.assertEqual(response.headers['Retry-After'], '60')
+            self.assertEqual(response.headers['Retry-After'], '3600')
             self.assertEqual(response.headers['Cache-Control'], 'no-store')
-            self.assertEqual(process.call_count, 30)
+            self.assertEqual(process.call_count, 600)
             self.assertEqual(client.get('/api/img/img_test', environ_base={'REMOTE_ADDR': '192.0.2.2'}).status_code, 308)
             self.assertEqual(client.get('/').status_code, 404)
 
@@ -42,12 +42,12 @@ class EndpointTests(unittest.TestCase):
             handler.path = '/api/' + name + '/' + name + '_test'
             handler.wfile = io.BytesIO()
             with patch.object(module, 'check_request', return_value=(429, 'Too many requests', {
-                    'Retry-After': '60', 'Cache-Control': 'no-store'})), patch.object(
+                    'Retry-After': '3600', 'Cache-Control': 'no-store'})), patch.object(
                     handler, 'send_response') as status, patch.object(
                     handler, 'send_header') as header, patch.object(handler, 'end_headers'):
                 handler.do_GET()
                 status.assert_called_once_with(429)
-                header.assert_any_call('Retry-After', '60')
+                header.assert_any_call('Retry-After', '3600')
                 self.assertEqual(handler.wfile.getvalue(), b'Too many requests')
 
     def test_storage_hit_without_flask_context(self):
