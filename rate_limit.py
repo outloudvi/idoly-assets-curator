@@ -69,12 +69,16 @@ def rate_limit_key(ip):
 
 
 limiter = LocalIPRateLimiter(config.RATE_LIMIT_DB_PATH)
+bypass_rate_limit_ip_range = set(config.BYPASS_RATE_LIMIT_IP_RANGE.split(","))
 
 
 def check_request(remote_addr, headers):
     """Return a rejection (status, body, headers), or None to proceed."""
+    client_ip_group = client_ip(remote_addr, headers)
+    if client_ip_group in bypass_rate_limit_ip_range:
+        return None
     try:
-        retry = limiter.check(rate_limit_key(client_ip(remote_addr, headers)))
+        retry = limiter.check(rate_limit_key())
     except sqlite3.Error:
         # Do not silently disable protection when local storage is unavailable.
         return 503, 'Service unavailable', {'Cache-Control': 'no-store'}
