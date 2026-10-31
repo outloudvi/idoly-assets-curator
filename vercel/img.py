@@ -3,11 +3,25 @@ from urllib.parse import urlparse
 
 from agents.img import ImageAgent
 from utils import POSITIVE_CACHE_TIME, NEGATIVE_CACHE_TIME, POSITIVE_ALT_CACHE_TIME
+from rate_limit import check_request
+
+
+global_cache: set[str] = set()
 
 
 class handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
+        rejection = check_request(self.client_address[0], self.headers)
+        if rejection:
+            status, body, headers = rejection
+            self.send_response(status)
+            self.send_header('Content-type', 'text/plain')
+            for name, value in headers.items():
+                self.send_header(name, value)
+            self.end_headers()
+            self.wfile.write(body.encode())
+            return
         path = urlparse(self.path).path.split("/")
         print(path)
         if len(path) != 4:
@@ -21,7 +35,7 @@ class handler(BaseHTTPRequestHandler):
             return
 
         slug = path[3]
-        result = ImageAgent(slug).process()
+        result = ImageAgent(slug).process(global_cache)
         if result[0] == 308:
             self.send_response(308)
             self.send_header('Location', result[1])

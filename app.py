@@ -4,6 +4,7 @@ from flask import Flask, request, g
 from agents.env import EnvironmentAgent
 from agents.img import ImageAgent
 from utils import log_to_matomo, post_agent
+from rate_limit import check_request
 
 app = Flask(__name__)
 global_cache: set[str] = set()
@@ -12,6 +13,11 @@ global_cache: set[str] = set()
 @app.before_request
 def before_request():
     g.start_time = perf_counter()
+    if request.path.startswith('/api/'):
+        rejection = check_request(request.remote_addr, request.headers)
+        if rejection:
+            status, body, headers = rejection
+            return body, status, headers
 
 
 @app.after_request

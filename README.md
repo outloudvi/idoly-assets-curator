@@ -12,6 +12,16 @@ I failed to add `ffmpeg` to my bundle for Vercel.
 
 💸
 
+## Tests
+
+```sh
+uv sync --frozen --python 3.12
+uv run python -m unittest discover -s tests -v
+```
+
+Tests mock B2 and upstream asset processing; no live storage credentials are
+needed.
+
 ## License
 
 AGPLv3

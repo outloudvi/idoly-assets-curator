@@ -1,12 +1,11 @@
 import io
-from urllib.parse import urljoin
-from os import path
-import requests
+from posixpath import join
+from urllib.parse import quote, urljoin
 
 import config
 from agent import Agent
 from utils import id_to_path_segs
-from upload.cloudinary import upload_file
+from upload.garage import exists_file, upload_file
 
 
 class ImageAgent(Agent):
@@ -16,19 +15,15 @@ class ImageAgent(Agent):
     def __init__(self, slug) -> None:
         super().__init__(slug)
         path_segs = id_to_path_segs(self.slug)
-        self.asset_path = path.join(
-            config.CL_ASSET_DIR, *path_segs
-        )
+        self.asset_path = join(
+            config.B2_ASSET_DIR.strip('/'), *path_segs
+        ) + '.webp'
 
     def pre_check(self) -> bool:
         return self.slug.startswith("img_")
 
     def shall_upload(self) -> bool:
-        assets_url_webp = urljoin(config.CL_BASEURL, self.asset_path + ".webp")
-        resp_webp = requests.get(assets_url_webp, headers={
-            "Range": "Bytes=0-1"
-        })
-        return resp_webp.status_code != 206
+        return not exists_file(self.asset_path)
 
     def pick_item(self, items):
         return list(filter(lambda x: x.type.name == self.filter_asset_type, items))[0]
@@ -46,4 +41,4 @@ class ImageAgent(Agent):
         )
 
     def generate_url(self):
-        return urljoin(config.CL_BASEURL, f"f_auto/{self.asset_path}.webp")
+        return urljoin(config.GARAGE_BASEURL.rstrip('/') + '/', quote(self.asset_path))

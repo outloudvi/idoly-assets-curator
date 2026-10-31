@@ -23,6 +23,7 @@ def exists_file(path: str) -> bool:
     try:
         obj.load()
     except ClientError as e:
-        if e.response.get("Error")["Code"] == "404":
+        if e.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
             return False
+        raise
     return True
